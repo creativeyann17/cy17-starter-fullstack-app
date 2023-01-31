@@ -1,0 +1,42 @@
+name: CD Publish and Deploy
+
+on:
+  push:
+    branches: [main, master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Update Dockerrun.aws.json
+        run: sed -i 's/__TAG__/${{ github.sha }}/g' Dockerrun.aws.json
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          build-args: |
+            UI_ENV_FILE=.env.dev
+          tags: creativeyann17/cy17-starter-fullstack-app:${{ github.sha }}
+      - name: Package
+        run: zip deploy.zip Dockerrun.aws.json
+      - name: Deploy to AWS
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: cy17-starter-fullstack-app
+          environment_name: Cy17starterfullstackapp-dev
+          version_label: 'cy17-starter-fullstack-app-${{ github.sha }}'
+          region: us-east-1
+          deployment_package: deploy.zip
