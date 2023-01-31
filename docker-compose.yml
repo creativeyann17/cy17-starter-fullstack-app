@@ -1,0 +1,10 @@
+version: '3'
+services:
+  fullstack:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UI_ENV_FILE: .env.dev
+    ports:
+      - '8080:8080'
