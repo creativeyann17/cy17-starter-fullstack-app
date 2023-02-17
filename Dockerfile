@@ -34,6 +34,7 @@ RUN apk add --no-cache binutils
 RUN $JAVA_HOME/bin/jlink \
     --verbose \
     --add-modules $(cat deps.info) \
+    --add-modules jdk.crypto.ec \
     --strip-debug \
     --no-man-pages \
     --no-header-files \
