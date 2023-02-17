@@ -20,11 +20,6 @@ springdoc:
   api-docs:
     enabled: false
     path: /openapi
-management:
-  endpoint:
-    health:
-      probes:
-        enabled: true
 logging:
   level:
     root: ERROR
