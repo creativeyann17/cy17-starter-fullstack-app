@@ -5,4 +5,4 @@ springdoc:
     enabled: true
 logging:
   level:
-    com.creativeyann17: DEBUG
+    com.creativeyann17.api: DEBUG

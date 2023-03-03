@@ -20,9 +20,21 @@ springdoc:
   api-docs:
     enabled: false
     path: /openapi
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,status
+status:
+  enabled: true
+  logs-size: 50
 logging:
+  file:
+    name: "./logs/app.log"
+    max-history: 1
+    max-size: 100KB
   level:
     root: ERROR
     org.springframework: ERROR
-    com.creativeyann17: INFO
+    com.creativeyann17.api: INFO
     org.hibernate: ERROR
