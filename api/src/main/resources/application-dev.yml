@@ -1,8 +1,0 @@
-springdoc:
-  swagger-ui:
-    enabled: true
-  api-docs:
-    enabled: true
-logging:
-  level:
-    com.creativeyann17.api: DEBUG

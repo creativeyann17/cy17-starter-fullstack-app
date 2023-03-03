@@ -1,5 +1,6 @@
-package com.creativeyann17.api;
+package com.creativeyann17.api.endpoints;
 
+import com.creativeyann17.api.UserDetails;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +10,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,9 +23,13 @@ import java.util.Arrays;
 @Aspect
 @Component
 @RestControllerEndpoint(id = "status")
-@ConditionalOnProperty(value="status.enabled", havingValue = "true")
+@ConditionalOnProperty(value = "status.enabled", havingValue = "true")
 @RequiredArgsConstructor
 public class StatusEndpoint {
+
+  private static final String ROOT_PACKAGE = "com.creativeyann17.api";
+
+  private final UserDetails userDetails;
 
   @Value("${logging.file.name}")
   private String logFileName;
@@ -31,7 +38,9 @@ public class StatusEndpoint {
   private long logsSize;
 
   @GetMapping
-  public ResponseEntity<String> customEndPoint(){
+  public ResponseEntity<String> customEndPoint() {
+    if (!userDetails.isSystem())
+      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     StringBuilder builder = new StringBuilder();
     builder.append(formatJava());
     builder.append(formatMonitors());
@@ -39,15 +48,17 @@ public class StatusEndpoint {
     return ResponseEntity.ok(builder.toString());
   }
 
-  @Around("within(com.creativeyann17.api..*)")
-  public Object monitors(ProceedingJoinPoint joinPoint) throws Throwable{
+  @Around("within(" + ROOT_PACKAGE + "..*)" +
+    "&& !within(" + ROOT_PACKAGE + ".filters..*)" +
+    "&& !within(" + ROOT_PACKAGE + ".configurations..*)")
+  public Object monitors(ProceedingJoinPoint joinPoint) throws Throwable {
     String targetClass = joinPoint.getTarget().getClass().getSimpleName();
     String targetMethod = joinPoint.getSignature().getName();
     var monitor = MonitorFactory.start(String.format("%s.%s()", targetClass, targetMethod));
     try {
       return joinPoint.proceed();
-    }finally {
-     monitor.stop();
+    } finally {
+      monitor.stop();
     }
   }
 
@@ -88,7 +99,7 @@ public class StatusEndpoint {
     builder.append("~~~~~\n");
     try {
       var lines = Files.readAllLines(Path.of(logFileName));
-      lines.stream().skip(Math.max(lines.size() - logsSize, 0)).forEach((l) -> builder.append(l+"\n"));
+      lines.stream().skip(Math.max(lines.size() - logsSize, 0)).forEach((l) -> builder.append(l + "\n"));
     } catch (Exception e) {
       builder.append("Failed to read logs: " + e.getMessage());
     }

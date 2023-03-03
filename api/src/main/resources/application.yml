@@ -4,6 +4,8 @@ server:
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
     min-response-size: 1024
 spring:
+  main:
+    lazy-initialization: true
   resources:
     cache:
       cachecontrol:
@@ -13,18 +15,18 @@ spring:
   jackson:
     property-naming-strategy: SNAKE_CASE
     default-property-inclusion: non_null
-springdoc:
-  swagger-ui:
-    enabled: false
-    path: /swagger-ui
-  api-docs:
-    enabled: false
-    path: /openapi
 management:
   endpoints:
     web:
       exposure:
         include: health,status
+security:
+  enabled: ${SECURITY_ENABLED:true}
+  apiToken: ${SECURITY_API_TOKEN:}
+  cors:
+    - "http://localhost:3000"
+  publics:
+    - "/actuator/health"
 status:
   enabled: true
   logs-size: 50

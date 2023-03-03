@@ -1,0 +1,5 @@
+security:
+  apiToken: foo
+logging:
+  level:
+    com.creativeyann17.api: DEBUG
