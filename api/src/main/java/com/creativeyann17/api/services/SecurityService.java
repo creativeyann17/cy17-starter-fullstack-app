@@ -5,13 +5,17 @@ import com.creativeyann17.api.configurations.SecurityConfiguration;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class SecurityService {
+
+  public static final String X_API_KEY = "X-API-KEY";
 
   private final SecurityConfiguration configuration;
   private final UserDetails userDetails;
@@ -19,11 +23,19 @@ public class SecurityService {
 
   public void checkAuthorization(HttpServletRequest request) {
     if (configuration.isEnabled()) {
-      if (StringUtils.hasText(configuration.getApiToken())) {
-        var apiToken = request.getHeader("X-API-TOKEN");
-        userDetails.setSystem(configuration.getApiToken().equals(apiToken));
+      var apiKey = configuration.getApiKey();
+      if (StringUtils.hasText(apiKey)) {
+        var userApiKey = request.getHeader(X_API_KEY);
+        if (!StringUtils.hasText(userApiKey)) {
+          throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        if (!apiKey.equals(userApiKey)) {
+          throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+        }
+        userDetails.setSystem(true);
       } else {
-        logOnceService.warn("Missing X-API-TOKEN value in configuration");
+        logOnceService.warn("Missing " +X_API_KEY+ " value in configuration");
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
       }
     }
   }

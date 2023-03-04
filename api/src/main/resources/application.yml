@@ -22,10 +22,12 @@ management:
         include: health,status
 security:
   enabled: ${SECURITY_ENABLED:true}
-  apiToken: ${SECURITY_API_TOKEN:}
+  apiKey: ${SECURITY_API_KEY:}
+  rate-limit: 5
   cors:
     - "http://localhost:3000"
   publics:
+    - "/api/hello"
     - "/actuator/health"
 status:
   enabled: true

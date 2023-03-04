@@ -1,6 +1,6 @@
 package com.creativeyann17.api.endpoints;
 
-import com.creativeyann17.api.UserDetails;
+import com.creativeyann17.api.services.RateLimiterService;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import lombok.RequiredArgsConstructor;
@@ -10,11 +10,9 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,7 +27,7 @@ public class StatusEndpoint {
 
   private static final String ROOT_PACKAGE = "com.creativeyann17.api";
 
-  private final UserDetails userDetails;
+  private final RateLimiterService rateLimiterService;
 
   @Value("${logging.file.name}")
   private String logFileName;
@@ -39,11 +37,10 @@ public class StatusEndpoint {
 
   @GetMapping
   public ResponseEntity<String> customEndPoint() {
-    if (!userDetails.isSystem())
-      throw new ResponseStatusException(HttpStatus.FORBIDDEN);
     StringBuilder builder = new StringBuilder();
     builder.append(formatJava());
     builder.append(formatMonitors());
+    builder.append(formatRateLimiters());
     builder.append(formatLogs());
     return ResponseEntity.ok(builder.toString());
   }
@@ -89,6 +86,18 @@ public class StatusEndpoint {
       builder.append(String.format("%-" + lm + "s -> %8.0f hits; %8.1f avg; %8.1f min; %8.1f max;\n", monitor.getLabel(),
         monitor.getHits(), monitor.getAvg(), monitor.getMin(), monitor.getMax()));
     }
+    builder.append("\n");
+    return builder.toString();
+  }
+
+  private String formatRateLimiters() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("RateLimiters:\n");
+    builder.append("~~~~~\n");
+    rateLimiterService.getCache().keySet().forEach((key) -> {
+      var bucket = rateLimiterService.getCache().get(key);
+      builder.append(String.format("%-10s -> %s\n", key, bucket.getAvailableTokens()));
+    });
     builder.append("\n");
     return builder.toString();
   }

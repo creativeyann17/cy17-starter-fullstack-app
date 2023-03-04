@@ -13,7 +13,8 @@ import java.util.List;
 public class SecurityConfiguration {
 
   private boolean enabled;
-  private String apiToken;
+  private String apiKey;
+  private long rateLimit;
   private List<String> cors = new ArrayList<>();
   private List<String> publics = new ArrayList<>();
 

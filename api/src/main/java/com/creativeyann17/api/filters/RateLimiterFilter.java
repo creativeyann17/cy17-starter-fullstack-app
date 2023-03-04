@@ -1,8 +1,6 @@
 package com.creativeyann17.api.filters;
 
-import com.creativeyann17.api.configurations.SecurityConfiguration;
 import com.creativeyann17.api.services.RateLimiterService;
-import com.creativeyann17.api.services.SecurityService;
 import com.creativeyann17.api.utils.FilterUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -15,25 +13,23 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Set;
 
 @Component
-@Order(2)
+@Order(1)
 @RequiredArgsConstructor
-public class SecurityFilter extends OncePerRequestFilter {
+public class RateLimiterFilter extends OncePerRequestFilter {
 
-  private final SecurityService securityService;
+  private final RateLimiterService rateLimiterService;
   private final FilterUtils filterUtils;
 
   @Override
   public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    securityService.checkAuthorization(request);
+    rateLimiterService.checkRateLimit(request);
     filterChain.doFilter(request, response);
   }
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-    return filterUtils.isNotSecured(request) || super.shouldNotFilter(request);
+    return filterUtils.isNotRateLimited(request);
   }
-
 }
