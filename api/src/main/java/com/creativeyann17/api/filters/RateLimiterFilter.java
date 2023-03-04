@@ -29,7 +29,7 @@ public class RateLimiterFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-    return filterUtils.isNotRateLimited(request);
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    return !filterUtils.isRateLimited(request);
   }
 }

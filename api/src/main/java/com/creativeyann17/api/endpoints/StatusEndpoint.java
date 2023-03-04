@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 
 @Aspect
@@ -36,12 +37,14 @@ public class StatusEndpoint {
   private long logsSize;
 
   @GetMapping
-  public ResponseEntity<String> customEndPoint() {
+  public ResponseEntity<String> status() {
+    var monitor = MonitorFactory.start("StatusEndpoint.status()");  // monitor yourself
     StringBuilder builder = new StringBuilder();
     builder.append(formatJava());
     builder.append(formatMonitors());
     builder.append(formatRateLimiters());
     builder.append(formatLogs());
+    monitor.stop();
     return ResponseEntity.ok(builder.toString());
   }
 
@@ -94,9 +97,12 @@ public class StatusEndpoint {
     StringBuilder builder = new StringBuilder();
     builder.append("RateLimiters:\n");
     builder.append("~~~~~\n");
-    rateLimiterService.getCache().keySet().forEach((key) -> {
-      var bucket = rateLimiterService.getCache().get(key);
-      builder.append(String.format("%-10s -> %s\n", key, bucket.getAvailableTokens()));
+    var rateKeys = rateLimiterService.getRates().keySet();
+    builder.append(String.format("Total: %s\n", rateKeys.size()));
+    builder.append(String.format("Last: %s\n", rateLimiterService.getRates().values().stream().map(RateLimiterService.Rate::getLastCall).max(LocalDateTime::compareTo)));
+    rateKeys.forEach((key) -> {
+      var rate = rateLimiterService.getRates().get(key);
+      builder.append(String.format("%-15s -> %s (%s)\n", key, rate.getBucket().getAvailableTokens(), rate.getLastCall()));
     });
     builder.append("\n");
     return builder.toString();

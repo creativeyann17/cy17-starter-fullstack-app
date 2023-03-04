@@ -1,4 +1,4 @@
-package com.creativeyann17.api;
+package com.creativeyann17.api.utils;
 
 import lombok.Data;
 import org.springframework.stereotype.Component;

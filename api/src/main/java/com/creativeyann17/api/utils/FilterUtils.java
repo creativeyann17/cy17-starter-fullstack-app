@@ -27,11 +27,12 @@ public class FilterUtils {
       this.securityConfiguration.getPublics().stream().anyMatch(p -> request.getRequestURI().startsWith(p));
   }
 
-  public boolean isNotSecured(HttpServletRequest request) {
-    return isStatic(request) || isPublic(request);
+  public boolean isSecured(HttpServletRequest request) {
+    return !(isStatic(request) || isPublic(request));
   }
 
-  public boolean isNotRateLimited(HttpServletRequest request) {
-    return !request.getRequestURI().startsWith("/api") || !isNotSecured(request);
+  public boolean isRateLimited(HttpServletRequest request) {
+    return request.getRequestURI().startsWith("/api") && !isSecured(request);
   }
+
 }

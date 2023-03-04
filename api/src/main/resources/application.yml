@@ -21,9 +21,9 @@ management:
       exposure:
         include: health,status
 security:
-  enabled: ${SECURITY_ENABLED:true}
+  enabled: true
   apiKey: ${SECURITY_API_KEY:}
-  rate-limit: 5
+  rate-limit: 10
   cors:
     - "http://localhost:3000"
   publics:
@@ -32,6 +32,8 @@ security:
 status:
   enabled: true
   logs-size: 50
+log-once:
+  eviction: 1 # hours
 logging:
   file:
     name: "./logs/app.log"

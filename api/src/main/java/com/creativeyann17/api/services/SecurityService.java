@@ -1,6 +1,6 @@
 package com.creativeyann17.api.services;
 
-import com.creativeyann17.api.UserDetails;
+import com.creativeyann17.api.utils.UserDetails;
 import com.creativeyann17.api.configurations.SecurityConfiguration;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;

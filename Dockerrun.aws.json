@@ -6,6 +6,7 @@
       "image": "creativeyann17/cy17-starter-fullstack-app:__TAG__",
       "essential": true,
       "memory": 512,
+      "cpu": 2,
       "portMappings": [
         {
           "hostPort": 80,

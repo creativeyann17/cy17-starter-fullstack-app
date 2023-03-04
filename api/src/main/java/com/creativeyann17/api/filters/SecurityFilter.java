@@ -32,8 +32,8 @@ public class SecurityFilter extends OncePerRequestFilter {
   }
 
   @Override
-  protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-    return filterUtils.isNotSecured(request) || super.shouldNotFilter(request);
+  protected boolean shouldNotFilter(HttpServletRequest request) {
+    return !filterUtils.isSecured(request);
   }
 
 }
