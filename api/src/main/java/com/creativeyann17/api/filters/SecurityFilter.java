@@ -1,7 +1,5 @@
 package com.creativeyann17.api.filters;
 
-import com.creativeyann17.api.configurations.SecurityConfiguration;
-import com.creativeyann17.api.services.RateLimiterService;
 import com.creativeyann17.api.services.SecurityService;
 import com.creativeyann17.api.utils.FilterUtils;
 import jakarta.servlet.FilterChain;
@@ -10,12 +8,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Set;
 
 @Component
 @Order(2)

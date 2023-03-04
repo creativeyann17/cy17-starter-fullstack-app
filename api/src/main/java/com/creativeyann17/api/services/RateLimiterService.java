@@ -10,15 +10,15 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Getter
 public class RateLimiterService {
 
+  private static final Object EVICTION_LOCK = new Object();
   private final Map<String, Rate> rates = new ConcurrentHashMap<>();
   private final SecurityConfiguration securityConfiguration;
 
@@ -42,11 +43,27 @@ public class RateLimiterService {
   }
 
   public void checkRateLimit(HttpServletRequest request) {
-    var ipAddress = request.getRemoteAddr();
-    var rate = resolveBucket(ipAddress);
-    rate.setLastCall(LocalDateTime.now());
-    if (!rate.getBucket().tryConsume(1)) {
-      throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+    synchronized (EVICTION_LOCK) { // lock only during eviction
+      var ipAddress = request.getRemoteAddr();
+      var rate = resolveBucket(ipAddress);
+      rate.setLastCall(LocalDateTime.now());
+      if (!rate.getBucket().tryConsume(1)) {
+        throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+      }
+    }
+  }
+
+  @Scheduled(fixedRateString = "${security.eviction}", timeUnit = TimeUnit.HOURS)
+  public void eviction() {
+    synchronized (EVICTION_LOCK) {
+      var keys = rates.keySet();
+      var expired = LocalDateTime.now().minus(1, TimeUnit.HOURS.toChronoUnit());
+      for (String key : keys) {
+        var rate = rates.get(key);
+        if (rate.getLastCall().isBefore(expired)) {
+          rates.remove(key);
+        }
+      }
     }
   }
 

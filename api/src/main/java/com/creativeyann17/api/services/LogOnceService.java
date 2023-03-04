@@ -14,8 +14,8 @@ public class LogOnceService {
 
   private final List<String> logs = new ArrayList<>();
 
-  @Scheduled(fixedRateString = "${log-once.eviction}", timeUnit = TimeUnit.HOURS)
-  public synchronized void reset() {
+  @Scheduled(fixedRateString = "${security.eviction}", timeUnit = TimeUnit.HOURS)
+  public synchronized void eviction() {
     logs.clear();
   }
 

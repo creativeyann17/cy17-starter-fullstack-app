@@ -24,6 +24,7 @@ security:
   enabled: true
   apiKey: ${SECURITY_API_KEY:}
   rate-limit: 10
+  eviction: 1 # hours / cleanup of old stuff
   cors:
     - "http://localhost:3000"
   publics:
@@ -32,8 +33,6 @@ security:
 status:
   enabled: true
   logs-size: 50
-log-once:
-  eviction: 1 # hours
 logging:
   file:
     name: "./logs/app.log"
