@@ -2,12 +2,12 @@ package com.creativeyann17.api.services;
 
 import com.creativeyann17.api.configurations.SecurityConfiguration;
 import com.creativeyann17.api.utils.UserDetails;
+import io.micrometer.common.util.StringUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -24,9 +24,9 @@ public class SecurityService {
   public void checkAuthorization(HttpServletRequest request) {
     if (configuration.isEnabled()) {
       var apiKey = configuration.getApiKey();
-      if (StringUtils.hasText(apiKey)) {
+      if (StringUtils.isNotBlank(apiKey)) {
         var userApiKey = request.getHeader(X_API_KEY);
-        if (!StringUtils.hasText(userApiKey)) {
+        if (StringUtils.isBlank(userApiKey)) {
           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
         if (!apiKey.equals(userApiKey)) {

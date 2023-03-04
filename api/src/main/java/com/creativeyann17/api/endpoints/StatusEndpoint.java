@@ -4,13 +4,13 @@ import com.creativeyann17.api.services.RateLimiterService;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -29,6 +29,10 @@ public class StatusEndpoint {
   private static final String ROOT_PACKAGE = "com.creativeyann17.api";
 
   private final RateLimiterService rateLimiterService;
+  private final long startedAt = System.currentTimeMillis();
+
+  @Value("${spring.application.name:}")
+  private String appName;
 
   @Value("${logging.file.name}")
   private String logFileName;
@@ -37,19 +41,51 @@ public class StatusEndpoint {
   private long logsSize;
 
   @GetMapping
-  public ResponseEntity<String> status() {
+  public String status() {
     var monitor = MonitorFactory.start("StatusEndpoint.status()");  // monitor yourself
     StringBuilder builder = new StringBuilder();
-    builder.append(formatJava());
-    builder.append(formatMonitors());
-    builder.append(formatRateLimiters());
-    builder.append(formatLogs());
+    builder.append(java());
+    builder.append(app());
+    builder.append(monitors());
+    builder.append(rates());
+    builder.append(logs());
     monitor.stop();
-    return ResponseEntity.ok(builder.toString());
+    return builder.toString();
+  }
+
+  @GetMapping("/java")
+  public String java() {
+    return formatJava();
+  }
+
+  @GetMapping("/app")
+  public String app() {
+    return formatApp();
+  }
+
+  @GetMapping("/monitors")
+  public String monitors() {
+    return formatMonitors();
+  }
+
+  @GetMapping("/rates")
+  public String rates() {
+    return formatRates();
+  }
+
+  @GetMapping("/logs")
+  public String logs() {
+    return formatLogs();
+  }
+  
+  @Around("@annotation("+ROOT_PACKAGE+".endpoints.Monitored)")
+  public Object monitored(ProceedingJoinPoint joinPoint) throws Throwable {
+    return monitors(joinPoint);
   }
 
   @Around("within(" + ROOT_PACKAGE + "..*)" +
     "&& !within(" + ROOT_PACKAGE + ".filters..*)" +
+    "&& !within(" + ROOT_PACKAGE + ".endpoints..*)" +
     "&& !within(" + ROOT_PACKAGE + ".configurations..*)")
   public Object monitors(ProceedingJoinPoint joinPoint) throws Throwable {
     String targetClass = joinPoint.getTarget().getClass().getSimpleName();
@@ -76,6 +112,16 @@ public class StatusEndpoint {
     return builder.toString();
   }
 
+  private String formatApp() {
+    StringBuilder builder = new StringBuilder();
+    builder.append("App:\n");
+    builder.append("~~~~~\n");
+    builder.append("Name: " + appName +"\n");
+    builder.append("Uptime: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - startedAt, "yyyy-MM-dd HH:mm:ss", true) +"\n");
+    builder.append("\n");
+    return builder.toString();
+  }
+
   private String formatMonitors() {
     StringBuilder builder = new StringBuilder();
     builder.append("Monitors:\n");
@@ -93,9 +139,9 @@ public class StatusEndpoint {
     return builder.toString();
   }
 
-  private String formatRateLimiters() {
+  private String formatRates() {
     StringBuilder builder = new StringBuilder();
-    builder.append("RateLimiters:\n");
+    builder.append("Rates:\n");
     builder.append("~~~~~\n");
     var rateKeys = rateLimiterService.getRates().keySet();
     builder.append(String.format("Total: %s\n", rateKeys.size()));
