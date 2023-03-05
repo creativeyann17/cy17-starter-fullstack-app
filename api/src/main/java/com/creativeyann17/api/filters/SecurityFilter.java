@@ -14,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@Order(2)
+@Order(3)
 @RequiredArgsConstructor
 public class SecurityFilter extends OncePerRequestFilter {
 

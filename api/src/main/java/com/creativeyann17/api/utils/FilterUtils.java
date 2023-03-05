@@ -12,14 +12,13 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FilterUtils {
 
-  private static final Set<String> STATIC_PATHS = Set.of("/", "/index.html");
-  private static final Set<String> STATIC_EXTS = Set.of(".js", ".css", ".json", ".jpg", ".png", ".gif", ".ttf", ".svg", ".ico");
+  private static final Set<String> STATIC_EXTS = Set.of(".html", ".map", ".js", ".css", ".json", ".jpg", ".png", ".gif", ".ttf", ".svg", ".ico");
 
   private final SecurityConfiguration securityConfiguration;
 
   public boolean isStatic(HttpServletRequest request) {
     var uri = request.getRequestURI();
-    return STATIC_PATHS.contains(uri) || STATIC_EXTS.stream().anyMatch(uri::endsWith);
+    return "/".equals(uri) || STATIC_EXTS.stream().anyMatch(uri::endsWith);
   }
 
   public boolean isPublic(HttpServletRequest request) {
@@ -33,6 +32,10 @@ public class FilterUtils {
 
   public boolean isRateLimited(HttpServletRequest request) {
     return request.getRequestURI().startsWith("/api") && !isSecured(request);
+  }
+
+  public boolean isReactRoute(HttpServletRequest request) {
+    return !request.getRequestURI().startsWith("/api") && !request.getRequestURI().startsWith("/actuator") && !isStatic(request);
   }
 
 }

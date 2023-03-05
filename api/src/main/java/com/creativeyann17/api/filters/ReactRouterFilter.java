@@ -14,21 +14,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-@Order(2)
+@Order(1)
 @RequiredArgsConstructor
-public class RateLimiterFilter extends OncePerRequestFilter {
+public class ReactRouterFilter extends OncePerRequestFilter {
 
-  private final RateLimiterService rateLimiterService;
   private final FilterUtils filterUtils;
 
   @Override
   public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-    rateLimiterService.checkRateLimit(request);
-    filterChain.doFilter(request, response);
+    request.getRequestDispatcher("/").forward(request, response);
   }
 
   @Override
   protected boolean shouldNotFilter(HttpServletRequest request) {
-    return !filterUtils.isRateLimited(request);
+    return !filterUtils.isReactRoute(request);
   }
 }

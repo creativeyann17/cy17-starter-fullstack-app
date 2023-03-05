@@ -54,4 +54,36 @@ class FilterUtilsTest {
     assertFalse(filterUtils.isRateLimited(request));
   }
 
+  @Test
+  @DisplayName("Should redirect a react route")
+  void isReactRoute() {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    when(request.getRequestURI()).thenReturn("/hello");
+    assertTrue(filterUtils.isReactRoute(request));
+  }
+
+  @Test
+  @DisplayName("Should not redirect a static")
+  void isReactRoute_static() {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    when(request.getRequestURI()).thenReturn("/style.css");
+    assertFalse(filterUtils.isReactRoute(request));
+  }
+
+  @Test
+  @DisplayName("Should not redirect api URI")
+  void isReactRoute_api() {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    when(request.getRequestURI()).thenReturn("/api/foo");
+    assertFalse(filterUtils.isReactRoute(request));
+  }
+
+  @Test
+  @DisplayName("Should not redirect actuator URI")
+  void isReactRoute_actuator() {
+    final HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
+    when(request.getRequestURI()).thenReturn("/actuator/health");
+    assertFalse(filterUtils.isReactRoute(request));
+  }
+
 }

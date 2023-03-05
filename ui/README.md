@@ -1,70 +1,110 @@
-# Getting Started with Create React App
+# cy17-starter-react-app
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Entire React App. starter that deploy on AWS Cloud with GitHubCI/CD and release actions for both dev/prod environments. Can be applied to anything that use a Dockerfile.
 
-## Available Scripts
+Check both current deployments in AWS cloud here:
 
-In the project directory, you can run:
+DEV: https://react-dev.creativeyann17.com/
 
-### `npm start`
+PROD: https://react.creativeyann17.com/
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Deployment
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The current deployment is done on **AWS Elasticbeanstalk** using **Docker ECS** and two separated envs `dev` and `prod`.
 
-### `npm test`
+- `cd.yml` will continually deploy every new merge on the main branch to the `dev` env.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- `release.yml` will deploy every new tag to the `prod` env.
 
-### `npm run build`
+_Note: release could be changed to deploy on a pre-prod env for example, letting only the AWS root user in charge of manually deploy prod_
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+The following secrets have to be set for the repository
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Docker-hub access token with `read/write` permissions:
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- DOCKER_USERNAME
+- DOCKER_PASSWORD
 
-### `npm run eject`
+AWS User with the following permission `AdministratorAccess-AWSElasticBeanstalk`:
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- AWS_ACCESS_KEY_ID
+- AWS_SECRET_ACCESS_KEY
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Docker-hub
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+Both `cd/release` actions will publish to **docker-hub** the built image with the following tag:
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+- `cd.yml` the current commit sha
+- `release.yml` the tag of the release
 
-## Learn More
+### Dockerrun.aws.json
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+`cd/release` actions will replace the content of `Dockerrun.aws.json` file by chaging the `__TAG__` of the docker image with the one being build so that **AWS ECS** will know reading this file which docker image to deploy.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+### Env vars
 
-### Code Splitting
+React apps are a little tricky when playing with env vars. This starter **set env vars when building and not at runtime**.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+## Libraries
 
-### Analyzing the Bundle Size
+- Rooting `react-router-dom`
+- Meta-tags `react-helmet`
+- i18n `i18n-next`
+- utils `lodash`
+- REST `axios-hooks`
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+### Node
 
-### Making a Progressive Web App
+The files should have the same node version:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- `.nvmrc`
+- `Dockerfile`
+- `ci.yml`
 
-### Advanced Configuration
+## Actions
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- `ci.yml` validate tests + dockerfile
+- `cd.yml` build main branch and publish to docker-hub then deploy AWS (dev env)
+- `release.yml` build tag and publish to docker-hub then deploy AWS (prod env)
 
-### Deployment
+## VSCode
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+### Extensions
 
-### `npm run build` fails to minify
+List of recommended extensions:
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Code Spell Checker
+- French - Code Spell Checker
+- Import cost
+- GitLens
+- Prettier - Code formatter
+- ESLint
+
+### Format
+
+Auto-format will be performed by `husky` on every staged files and on save as defined in `.vscode/settings.json`.
+
+ESLint configuration can be changed with `npx eslint --init`.
+
+### Tabs <=> spaces
+
+There are several places to modify to switch from tabs to spaces (and reverse):
+
+Changes the following files **with consistency**:
+
+- `.vscode/settings.json` editor.tabSize/insertSpaces
+- `.eslintrc.js` rules.indent (2 or tab)
+- `.prettierrc` tabWidth should be the same as the others
+
+## AWS Cloud
+
+### Domain + DNS + Cert
+
+Do the following to have a custom domain + HTTPs + DNS redirection to sub-domains:
+
+- **route53** request a domain (cost money) and wait for validation.
+- **ACM** request a public certificate for that domain. Select DNS validation.
+- **route53** a new hosted zone should be created by **ACM** for that domain.
+- **EB** When cert is validated, add load-balancer rules for port 443 to use the certificate.
+- **route53** in the hosted zone add all the record you want from sub-domain url to the **EB** instance where the docker run.
+- **EC2** find the load-balancer, delete the listener 80 and create a new one to redirect 80 to 443
