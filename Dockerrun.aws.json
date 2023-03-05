@@ -11,6 +11,12 @@
           "hostPort": 80,
           "containerPort": 8080
         }
+      ],
+      "secrets": [
+        {
+          "name": "X-API-KEY",
+          "valueFrom": "arn:aws:secretsmanager:us-east-1:624685465016:secret:dev/full/apiKey-tg6uKo"
+        }
       ]
     }
   ]
