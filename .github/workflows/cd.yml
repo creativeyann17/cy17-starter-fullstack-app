@@ -38,5 +38,5 @@ jobs:
           application_name: cy17-starter-fullstack-app
           environment_name: Cy17starterfullstackapp-dev
           version_label: 'cy17-starter-fullstack-app-${{ github.sha }}'
-          region: us-east-1
+          region: ${{ secrets.AWS_REGION }} 
           deployment_package: deploy.zip
