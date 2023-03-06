@@ -12,13 +12,13 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class FilterUtils {
 
-  private static final Set<String> STATIC_EXTS = Set.of(".html", ".map", ".js", ".css", ".json", ".jpg", ".png", ".gif", ".ttf", ".svg", ".ico");
+  private static final Set<String> STATIC_FILES = Set.of(".html", ".map", ".js", ".css", ".json", ".jpg", ".png", ".gif", ".ttf", ".svg", ".ico");
 
   private final SecurityConfiguration securityConfiguration;
 
   public boolean isStatic(HttpServletRequest request) {
     var uri = request.getRequestURI();
-    return "/".equals(uri) || STATIC_EXTS.stream().anyMatch(uri::endsWith);
+    return "/".equals(uri) || STATIC_FILES.stream().anyMatch(uri::endsWith);
   }
 
   public boolean isPublic(HttpServletRequest request) {

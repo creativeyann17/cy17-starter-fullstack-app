@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -35,8 +36,9 @@ public class RateLimiterService {
   }
 
   private Rate newBucket(String apiKey) {
-    Refill refill = Refill.greedy(securityConfiguration.getRateLimit(), Duration.ofSeconds(60));
-    Bandwidth limit = Bandwidth.classic(securityConfiguration.getRateLimit(), refill);
+    var capacityPerMinute = securityConfiguration.getRateLimit();
+    Refill refill = Refill.greedy(capacityPerMinute, Duration.ofSeconds(60));
+    Bandwidth limit = Bandwidth.classic(capacityPerMinute, refill);
     return new Rate(Bucket.builder()
       .addLimit(limit)
       .build());
@@ -65,6 +67,14 @@ public class RateLimiterService {
         }
       }
     }
+  }
+
+  public Optional<LocalDateTime> getLastCall() {
+    return rates.values().stream().map(RateLimiterService.Rate::getLastCall).max(LocalDateTime::compareTo);
+  }
+
+  public long getCurrentRatePerMinute() {
+    return securityConfiguration.getRateLimit();
   }
 
   @Data

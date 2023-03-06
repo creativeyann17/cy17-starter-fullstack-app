@@ -1,4 +1,6 @@
 server:
+  http2:
+    enabled: true
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
@@ -25,7 +27,7 @@ management:
 security:
   enabled: true
   apiKey: ${SECURITY_API_KEY:}
-  rate-limit: 10
+  rate-limit: 10 # capacity per minutes
   eviction: 1 # hours / cleanup of old stuff
   cors:
     - "http://localhost:3000"
@@ -34,7 +36,7 @@ security:
     - "/actuator/health"
 status:
   enabled: true
-  logs-size: 50
+  logs-size: 100
 logging:
   file:
     name: "./logs/app.log"
