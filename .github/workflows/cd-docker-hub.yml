@@ -28,15 +28,15 @@ jobs:
           build-args: |
             UI_ENV_FILE=.env.dev
           tags: creativeyann17/cy17-starter-fullstack-app:${{ github.sha }}
-      - name: Package
-        run: zip deploy.zip Dockerrun.aws.json
-      - name: Deploy to AWS
-        uses: einaregilsson/beanstalk-deploy@v21
-        with:
-          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          application_name: cy17-starter-fullstack-app
-          environment_name: Cy17starterfullstackapp-dev
-          version_label: 'cy17-starter-fullstack-app-${{ github.sha }}'
-          region: ${{ secrets.AWS_REGION }} 
-          deployment_package: deploy.zip
+      #- name: Package
+      #  run: zip deploy.zip Dockerrun.aws.json
+      #- name: Deploy to AWS
+      #  uses: einaregilsson/beanstalk-deploy@v21
+      #  with:
+      #    aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #    aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #    application_name: cy17-starter-fullstack-app
+      #    environment_name: Cy17starterfullstackapp-dev
+      #    version_label: 'cy17-starter-fullstack-app-${{ github.sha }}'
+      #    region: ${{ secrets.AWS_REGION }} 
+      #    deployment_package: deploy.zip

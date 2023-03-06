@@ -1,4 +1,4 @@
-name: Deploy to App Runner
+name: CD Publish and Deploy
 on:
   push:
     branches: [main, master]
