@@ -8,10 +8,10 @@ services:
         UI_ENV_FILE: .env.dev
     ports:
       - '8080:8080'
-    mem_limit: "1g"
-    mem_reservation: "512m"
-    cpus: 1
-    cpuset: "2"
+    environment:
+      SECURITY_API_KEY: foo
+    mem_limit: "2g"
+    cpuset: "1"
     healthcheck:
       test: curl -Is localhost:8080 | head -n 1 | grep 200 || exit 1
       interval: 10s
