@@ -9,7 +9,7 @@ services:
       DOMAIN: ${DOMAIN}
     volumes:
       - ./nginx:/etc/nginx/templates
-      - ${CERTS_PATH}:/etc/letsencrypt/live:ro
+      - ${CERTS_PATH}:/certs:ro
     healthcheck:
       test: curl -Is localhost:80 | head -n 1 | grep 200 || exit 1
       interval: 10s
