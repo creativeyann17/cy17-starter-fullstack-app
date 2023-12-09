@@ -4,7 +4,6 @@ import com.creativeyann17.api.services.RateLimiterService;
 import com.creativeyann17.api.utils.DateUtils;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
-import io.undertow.Undertow;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -13,8 +12,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.endpoint.web.annotation.RestControllerEndpoint;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.web.ServerProperties;
-import org.springframework.boot.web.embedded.undertow.UndertowServletWebServerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -37,7 +34,6 @@ public class StatusEndpoint {
 
   private final RateLimiterService rateLimiterService;
   private final ApplicationContext ctx;
-  private final ServerProperties serverProperties;
 
   @Value("${spring.application.name:}")
   private String appName;
@@ -85,7 +81,6 @@ public class StatusEndpoint {
     builder.append("Profiles: " + Arrays.toString(ctx.getEnvironment().getActiveProfiles()) +"\n");
     builder.append("Server time: " + LocalDateTime.now().format(DateUtils.SIMPLE_FORMATTER) +"\n");
     builder.append("Uptime: " + DurationFormatUtils.formatDuration(System.currentTimeMillis() - ctx.getStartupDate(), DateUtils.DATE_TIME_FORMAT, true) +"\n");
-    builder.append(String.format("Max simultaneous requests: %s\n", serverProperties.getUndertow().getThreads().getIo() * serverProperties.getUndertow().getThreads().getWorker()));
     builder.append("\n");
     return builder.toString();
   }
