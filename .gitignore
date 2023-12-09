@@ -1,2 +1,2 @@
 .env
-keystore.p12
+certs/*

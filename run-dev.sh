@@ -1,2 +1,3 @@
 # fake SSL: keytool -genkeypair -alias tomcat -keyalg RSA -keysize 2048 -storetype PKCS12 -keystore keystore.p12 -validity 3650 -dname CN=FooBar -keypass changeit -storepass changeit
+# Fake PEM: openssl req -x509 -out fullchain.pem -keyout privkey.pem -newkey rsa:2048 -nodes -sha256 -subj '/CN=localhost' -extensions EXT -config <(printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
 docker-compose down --rmi all && docker-compose up

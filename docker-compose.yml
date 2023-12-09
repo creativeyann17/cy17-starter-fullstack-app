@@ -1,26 +1,42 @@
 version: '3'
 services:
+  nginx:
+    image: nginx:stable
+    ports:
+      - '80:80'
+      - '443:443'
+    environment:
+      DOMAIN: ${DOMAIN}
+    volumes:
+      - ./nginx:/etc/nginx/templates
+      - ${CERTS_PATH}:/etc/letsencrypt/live:ro
+    healthcheck:
+      test: curl -Is localhost:80 | head -n 1 | grep 200 || exit 1
+      interval: 10s
+      timeout: 2s
+      retries: 5
+    restart: always
+    #network_mode: host
   app:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         UI_ENV_FILE: .env.${ENV}
-    volumes:
-      - ${SSL_KEY_STORE}:/etc/cert/cert.pk12:ro
-    ports:
-      - '80:8080'
-      - '443:8443'
+    depends_on:
+      - nginx
+    #ports:
+    #  - '8080:8080'
     environment:
       SPRING_PROFILES_ACTIVE: ${ENV}
       SECURITY_API_KEY: ${SECURITY_API_KEY}
-      SSL_KEY_STORE: /etc/cert/cert.pk12
-      SSL_KEY_STORE_PWD: ${SSL_KEY_STORE_PWD}
     mem_limit: "512m"
     mem_reservation: "256m"
     cpus: 1
     healthcheck:
       test: curl -Is localhost:8080 | head -n 1 | grep 200 || exit 1
       interval: 10s
-      timeout: 2s
-      retries: 10
+      timeout: 15s
+      retries: 5
+    restart: always
+    #network_mode: host

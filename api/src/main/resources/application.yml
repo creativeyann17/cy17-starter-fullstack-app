@@ -1,10 +1,10 @@
 server:
-  undertow:
-    threads: # https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/Undertow.java#L438
-      io: 2
-      worker: 5
-  http2:
-    enabled: true
+  #undertow:
+  #  threads: # https://github.com/undertow-io/undertow/blob/master/core/src/main/java/io/undertow/Undertow.java#L438
+  #    io: 2
+  #    worker: 5
+  #http2:
+  #  enabled: true
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json

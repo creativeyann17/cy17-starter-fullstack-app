@@ -1,6 +1,0 @@
-server:
-  port: 8443
-  ssl:
-    key-store: ${SSL_KEY_STORE}
-    key-store-password: ${SSL_KEY_STORE_PWD}
-    key-alias: tomcat
