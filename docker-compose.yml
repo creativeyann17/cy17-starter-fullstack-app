@@ -7,6 +7,9 @@ services:
       - '443:443'
     environment:
       DOMAIN: ${DOMAIN}
+    mem_limit: "256m"
+    mem_reservation: "128m"
+    cpus: 1
     volumes:
       - ./nginx:/etc/nginx/templates
       - ${CERTS_PATH}:/certs:ro
