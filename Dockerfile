@@ -46,7 +46,7 @@ FROM alpine:latest
 WORKDIR /app
 
 ENV JAVA_HOME=/jre
-ENV JAVA_OPTS="-XX:+UseZGC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XshowSettings:vm -XX:+PrintCommandLineFlags"
+ENV JAVA_OPTS="-XX:+UseG1GC -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -XshowSettings:vm -XX:+PrintCommandLineFlags -XX:+TieredCompilation"
 ENV PATH="$PATH:$JAVA_HOME/bin"
 
 COPY --from=build-jre /tmp/jre/minimal $JAVA_HOME

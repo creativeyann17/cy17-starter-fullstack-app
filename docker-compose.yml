@@ -13,6 +13,7 @@ services:
     volumes:
       - ./nginx:/etc/nginx/templates
       - ${CERTS_PATH}:/certs:ro
+      - /var/log/nginx:/var/log/nginx # logs for fail2ban
     healthcheck:
       test: curl -Is localhost:80 | head -n 1 | grep 200 || exit 1
       interval: 10s
